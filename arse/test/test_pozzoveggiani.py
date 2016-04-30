@@ -2,7 +2,6 @@ from __future__ import absolute_import, print_function
 import os
 import sys
 import matplotlib.pyplot as plt
-import seaborn.apionly as sns
 import PIL.Image
 import numpy as np
 import scipy.io
