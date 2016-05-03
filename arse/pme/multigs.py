@@ -40,7 +40,7 @@ class ModelGenerator(object):
             for j in range(min_sample_size):
                 k = np.random.choice(all_elems, p=probas)
                 sample.append(k)
-                pk = self._compute_probabilities(ranking, k)
+                pk = ModelGenerator._compute_probabilities(ranking, k)
                 if j == 0:
                     probas = pk
                 else:
@@ -61,11 +61,12 @@ class ModelGenerator(object):
             return np.append(residuals, dist, axis=1)
 
     def _rank(self, residuals):
-        h = np.ceil(residuals.shape[1] * self.h_ratio)
+        h = int(np.ceil(residuals.shape[1] * self.h_ratio))
         ranking = np.argpartition(residuals, h, axis=1)
         return ranking[:, :h]
 
-    def _compute_probabilities(self, ranking, k):
+    @staticmethod
+    def _compute_probabilities(ranking, k):
         def intersect_ratio(a, b):
             return float(np.intersect1d(a, b, assume_unique=True).size) / a.size
         p = np.apply_along_axis(intersect_ratio, 1, ranking, ranking[k, :])
