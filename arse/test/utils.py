@@ -40,7 +40,7 @@ def compute_stats(stats, verbose=True):
 
 
 def clean(model_class, x, thresholder, ac_tester, bic_list,
-          check_overlap=False):
+          check_overlap=False, share_elements=True):
     min_sample_size = model_class().min_sample_size
     bic_list = [bic for bic in bic_list
                 if bic[1].nnz > 10 and bic[0].nnz >= min_sample_size]
@@ -58,8 +58,9 @@ def clean(model_class, x, thresholder, ac_tester, bic_list,
         return [], []
 
     # filter out non-meaningful groups
-    inliers_list, model_list, bic_list = meaningful(ac_tester, inliers_list,
-                                                    model_list, bic_list)
+    keep = meaningful(ac_tester, inliers_list)
+    inliers_list, model_list, bic_list = filter_in(keep, inliers_list,
+                                                   model_list, bic_list)
 
     keep = ac.exclusion_principle(x, thresholder, ac_tester, inliers_list,
                                   model_list)
@@ -71,18 +72,20 @@ def clean(model_class, x, thresholder, ac_tester, bic_list,
         inliers_list, model_list, bic_list = filter_in(keep, inliers_list,
                                                        model_list, bic_list)
 
+    if not share_elements:
+        solve_intersections(x, inliers_list, model_list)
+        keep = meaningful(ac_tester, inliers_list)
+        inliers_list, model_list, bic_list = filter_in(keep, inliers_list,
+                                                       model_list, bic_list)
+
     bic_list = inliers_to_left_factors(inliers_list, bic_list)
 
     return model_list, bic_list
 
 
-def meaningful(ac_tester, inliers_list, model_list, bic_list):
-    z_list = zip(inliers_list, model_list, bic_list)
-    z_list = filter(lambda e: ac_tester.meaningful(e[0]), z_list)
-    if z_list:
-        return zip(*z_list)
-    else:
-        return [], [], []
+def meaningful(ac_tester, inliers_list):
+    keep = filter(lambda e: ac_tester.meaningful(e[1]), enumerate(inliers_list))
+    return zip(*keep)[0]
 
 
 def filter_in(keep, inliers_list, model_list, bic_list):
@@ -109,6 +112,14 @@ def keep_disjoint(tester, inliers_list, tol=0.3):
                 to_remove.append(i1)
     keep = set(size) - set(to_remove)
     return keep
+
+
+def solve_intersections(x, inliers_list, model_list):
+    intersection = np.sum(np.vstack(inliers_list) > 0, axis=0) > 1
+    dists = [mod.distances(x[intersection, :]) for mod in model_list]
+    idx = np.argmin(np.vstack(dists), axis=0)
+    for i, inliers in enumerate(inliers_list):
+        inliers[intersection] = idx == i
 
 
 def inliers_to_left_factors(inliers_list, bic_list):
