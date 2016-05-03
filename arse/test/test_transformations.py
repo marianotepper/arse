@@ -1,11 +1,9 @@
 from __future__ import absolute_import, print_function
-import sys
 import os
 import PIL
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import seaborn.apionly as sns
-import scipy.spatial.distance as distance
 import numpy as np
 import scipy.io
 import pickle
@@ -13,37 +11,6 @@ import timeit
 import arse.biclustering as bc
 import arse.test.utils as test_utils
 import arse.pme.preference as pref
-import arse.pme.multigs as multigs
-import arse.pme.membership as membership
-import arse.pme.homography as homography
-import arse.pme.fundamental as fundamental
-import arse.pme.acontrario as ac
-
-
-def load(path, tol=1e-5):
-    data = scipy.io.loadmat(path)
-
-    x = data['data'].T
-    gt = np.squeeze(data['label'])
-
-    # remove repeated points
-    m = x.shape[0]
-    dist = distance.squareform(distance.pdist(x)) + np.triu(np.ones((m, m)), 0)
-    mask = np.all(dist >= tol, axis=1)
-    gt = gt[mask]
-    x = x[mask, :]
-
-    # sort in reverse order (inliers first, outliers last)
-    inv_order = np.argsort(gt)[::-1]
-    gt = gt[inv_order]
-    x = x[inv_order, :]
-
-    x[:, 0:2] -= np.array(data['img1'].shape[:2], dtype=np.float) / 2
-    x[:, 3:5] -= np.array(data['img2'].shape[:2], dtype=np.float) / 2
-
-    data['data'] = x
-    data['label'] = gt
-    return data
 
 
 def base_plot(data):
@@ -117,11 +84,13 @@ def run_biclustering(model_class, data, pref_matrix, comp_level, thresholder,
         inliers = reduce(lambda a, b: np.logical_or(a, b), bc_groups)
     else:
         inliers = np.zeros((pref_matrix.shape[0],), dtype=np.bool)
-    bc_groups.append(np.logical_not(inliers))
-    gt_groups = ground_truth(data['label'])
-    gnmi, prec, rec = test_utils.compute_measures(gt_groups, bc_groups)
-
-    return dict(time=t1, gnmi=gnmi, precision=prec, recall=rec)
+    if 'label' in data:
+        bc_groups.append(np.logical_not(inliers))
+        gt_groups = ground_truth(data['label'])
+        gnmi, prec, rec = test_utils.compute_measures(gt_groups, bc_groups)
+        return dict(time=t1, gnmi=gnmi, precision=prec, recall=rec)
+    else:
+        return dict(time=t1)
 
 
 def test(model_class, data, name, ransac_gen, thresholder, ac_tester,
@@ -137,13 +106,14 @@ def test(model_class, data, name, ransac_gen, thresholder, ac_tester,
     base_plot(data)
     plt.savefig(output_prefix + '_data.pdf', dpi=600)
 
-    gt_groups = ground_truth(data['label'])
-    gt_colors = sns.color_palette('Set1', len(gt_groups) - 1)
-    gt_colors.insert(0, [1., 1., 1.])
-    plot_models(data, gt_groups, palette=gt_colors)
-    plt.savefig(output_prefix + '_gt10.pdf', dpi=600)
-    plot_models(data, gt_groups, palette=gt_colors, s=.1, marker='.')
-    plt.savefig(output_prefix + '_gt1.pdf', dpi=600)
+    if 'label' in data:
+        gt_groups = ground_truth(data['label'])
+        gt_colors = sns.color_palette('Set1', len(gt_groups) - 1)
+        gt_colors.insert(0, [1., 1., 1.])
+        plot_models(data, gt_groups, palette=gt_colors)
+        plt.savefig(output_prefix + '_gt10.pdf', dpi=600)
+        plot_models(data, gt_groups, palette=gt_colors, s=.1, marker='.')
+        plt.savefig(output_prefix + '_gt1.pdf', dpi=600)
 
     pref_matrix, _ = pref.build_preference_matrix(ransac_gen, thresholder,
                                                   ac_tester)
@@ -173,82 +143,3 @@ def test(model_class, data, name, ransac_gen, thresholder, ac_tester,
                                   output_prefix + '_bic_comp')
 
     return stats_reg, stats_comp
-
-
-def run(transformation, inliers_threshold):
-    logger = test_utils.Logger('test_{0}_{1:e}.txt'.format(transformation,
-                                                             inliers_threshold))
-    sys.stdout = logger
-
-    n_samples = 2000
-    epsilon = 0
-
-    path = '../data/adelaidermf/{0}/'.format(transformation)
-
-    filenames = []
-    for (_, _, fn) in os.walk(path):
-        filenames.extend(fn)
-        break
-
-    stats_list = []
-    for example in filenames:
-        # if example != 'biscuit.mat':
-        #     continue
-        # if example != 'biscuitbookbox.mat':
-        #     continue
-        # if example != 'breadcartoychips.mat':
-        #     continue
-        # if example != 'boardgame.mat':
-        #     continue
-
-        data = load(path + example)
-
-        if transformation == 'homography':
-            model_class = homography.Homography
-            nfa_proba = np.pi / np.prod(data['img2'].shape[:2])
-        else:
-            model_class = fundamental.Fundamental
-            img_size = data['img2'].shape[:2]
-            nfa_proba = (2. * np.linalg.norm(img_size) / np.prod(img_size))
-
-        generator = multigs.ModelGenerator(model_class, data['data'], n_samples)
-        min_sample_size = model_class().min_sample_size
-        ac_tester = ac.ImageTransformNFA(epsilon, nfa_proba, min_sample_size)
-        thresholder = membership.GlobalThresholder(inliers_threshold)
-
-        seed = 0
-        # seed = np.random.randint(0, np.iinfo(np.uint32).max)
-        print('seed:', seed)
-        np.random.seed(seed)
-
-        prefix = example[:-4]
-        dir_name = '{0}_{1:e}'.format(transformation, inliers_threshold)
-
-        res = test(model_class, data, prefix, generator, thresholder, ac_tester,
-                   dir_name)
-        stats_list.append(res)
-
-        print('-'*40)
-        plt.close('all')
-
-    reg_list, comp_list = zip(*stats_list)
-
-    print('Statistics of regular bi-clustering')
-    test_utils.compute_stats(reg_list)
-    print('Statistics of compressed bi-clustering')
-    test_utils.compute_stats(comp_list)
-    print('-'*40)
-
-    sys.stdout = logger.stdout
-    logger.close()
-
-
-def run_all():
-    for thresh in np.power(np.arange(.5, 4, .5), 2):
-        run('homography', thresh)
-    for thresh in np.arange(2.5e-3, 2.51e-2, 2.5e-3):
-        run('fundamental', thresh)
-
-if __name__ == '__main__':
-    run_all()
-    plt.show()
