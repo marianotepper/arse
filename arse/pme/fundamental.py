@@ -29,11 +29,6 @@ class Fundamental(object):
     def distances(self, data):
         pts1_norm = data[:, :3]
         pts2_norm = data[:, 3:]
-
         epi_lines1 = np.dot(pts1_norm, self.F.T)
         epi_lines1 /= np.linalg.norm(epi_lines1[:2])
-        # epi_lines2 = np.dot(pts2_norm, self.F)
-        # epi_lines2 /= np.linalg.norm(epi_lines2[:2])
-        # return np.maximum(np.abs(np.sum(pts2_norm * epi_lines1, axis=1)),
-        #                   np.abs(np.sum(pts1_norm * epi_lines2, axis=1)))
         return np.abs(np.sum(pts2_norm * epi_lines1, axis=1))
