@@ -85,7 +85,10 @@ def clean(model_class, x, thresholder, ac_tester, bic_list,
 
 def meaningful(ac_tester, inliers_list):
     keep = filter(lambda e: ac_tester.meaningful(e[1]), enumerate(inliers_list))
-    return zip(*keep)[0]
+    if keep:
+        return zip(*keep)[0]
+    else:
+        return []
 
 
 def filter_in(keep, inliers_list, model_list, bic_list):
