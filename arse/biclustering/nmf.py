@@ -119,7 +119,7 @@ def nmf_robust_admm(array, update='both', lambda_u=1, lambda_v=1, lambda_e=1,
         gamma_e = np.zeros(e.shape)
 
     error = []
-    for kk in range(int(max_iter)):
+    for _ in range(int(max_iter)):
         temp = array - e
         if update == 'both' or update == 'left':
             x, u, gamma_u = _admm_left_update(temp, u, y, lambda_u, gamma_u,
