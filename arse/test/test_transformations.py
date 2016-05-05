@@ -45,11 +45,29 @@ def plot_models(data, groups, palette, s=10, marker='o'):
     plt.figure()
     gs = gridspec.GridSpec(1, 2)
     gs.update(wspace=0)
-
     plt.subplot(gs[0])
     inner_plot_img(x[:, 0:2], data['img1'])
     plt.subplot(gs[1])
     inner_plot_img(x[:, 3:5], data['img2'])
+
+
+def line_plot(data, groups, palette, s=2, marker='o'):
+    x = data['data']
+    x1 = x[:, :2] + np.array(data['img1'].shape[:2], dtype=np.float) / 2
+    x2 = x[:, 3:5] + np.array(data['img2'].shape[:2], dtype=np.float) / 2
+    img = np.hstack((data['img1'], data['img2']))
+    width1 = data['img1'].shape[1]
+
+    plt.figure()
+    plt.hold(True)
+    gray_image = PIL.Image.fromarray(img).convert('L')
+    plt.imshow(gray_image, cmap='gray', interpolation='none')
+    for g, color in zip(groups, palette):
+        for i in np.where(g)[0]:
+            plt.plot([x1[i, 0], x2[i, 0] + width1], [x1[i, 1], x2[i, 1]],
+                     c=color, linewidth=.5, marker=marker, markersize=s,
+                     markerfacecolor='none', markeredgecolor=color, alpha=.5)
+    plt.axis('off')
 
 
 def ground_truth(labels):
@@ -79,6 +97,9 @@ def run_biclustering(model_class, data, pref_matrix, comp_level, thresholder,
 
     plot_models(data, bc_groups, palette=colors)
     plt.savefig(output_prefix + '_final_models.pdf', dpi=600)
+
+    line_plot(data, bc_groups, palette=colors)
+    plt.savefig(output_prefix + '_line_plot.pdf', dpi=600)
 
     if bc_groups:
         inliers = reduce(lambda a, b: np.logical_or(a, b), bc_groups)
