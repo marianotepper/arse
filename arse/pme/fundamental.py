@@ -30,5 +30,5 @@ class Fundamental(object):
         pts1_norm = data[:, :3]
         pts2_norm = data[:, 3:]
         epi_lines1 = np.dot(pts1_norm, self.F.T)
-        epi_lines1 /= np.linalg.norm(epi_lines1[:2])
+        epi_lines1 /= np.linalg.norm(epi_lines1[:, :2], axis=1)[:, np.newaxis]
         return np.abs(np.sum(pts2_norm * epi_lines1, axis=1))
