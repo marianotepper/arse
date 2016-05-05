@@ -57,15 +57,6 @@ def run(transformation, inliers_threshold):
 
     stats_list = []
     for example in filenames:
-        # if example != 'biscuit.mat':
-        #     continue
-        # if example != 'biscuitbookbox.mat':
-        #     continue
-        # if example != 'breadcartoychips.mat':
-        #     continue
-        # if example != 'boardgame.mat':
-        #     continue
-
         data = load(path + example)
 
         if transformation == 'homography':
@@ -109,10 +100,11 @@ def run(transformation, inliers_threshold):
 
 
 def run_all():
-    for thresh in np.power(np.arange(.5, 4, .5), 2):
+    for thresh in np.arange(1, 20, .5):
         run('homography', thresh)
-    for thresh in np.arange(2.5e-3, 2.51e-2, 2.5e-3):
+    for thresh in np.arange(1, 20, .5):
         run('fundamental', thresh)
+
 
 if __name__ == '__main__':
     run_all()
