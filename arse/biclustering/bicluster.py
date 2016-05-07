@@ -47,6 +47,11 @@ def bicluster(array, n=None, share_elements=True, comp_level=None):
 
 
 def single_bicluster(array, comp_level=None):
+    if array.shape[1] == 1:
+        u = array[:, 0]
+        v = np.ones(shape=(1, 1))
+        return utils.sparsify(u, dtype=bool), utils.sparsify(v, dtype=bool)
+
     if comp_level is not None and comp_level < array.shape[1]:
         selection = compression.compress_columns(array, comp_level)
         if selection is not None:
