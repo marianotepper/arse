@@ -27,6 +27,8 @@ class Fundamental(object):
                                            method=cv2.FM_8POINT)
 
     def distances(self, data):
+        if self.F is None:
+            return np.inf * np.ones(shape=(data.shape[0],))
         pts1_norm = data[:, :3]
         pts2_norm = data[:, 3:]
         epi_lines1 = np.dot(pts1_norm, self.F.T)
