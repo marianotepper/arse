@@ -161,7 +161,8 @@ def run(types, inliers_threshold=0.02, local_ratio=3., restimate_gt=False):
     # a contrario test parameters
     epsilon = 0.
 
-    config = {'Star': line.Line,
+    config = {'Star5': line.Line,
+              'Star11': line.Line,
               'Stairs': line.Line,
               'Circles': circle.Circle,
               }
@@ -190,9 +191,9 @@ def run(types, inliers_threshold=0.02, local_ratio=3., restimate_gt=False):
         thresholder = membership.LocalThresholder(inliers_threshold,
                                                   ratio=local_ratio)
 
-        match = re.match(ex_type + '[0-9]*_', example)
+        match = re.match('[a-zA-Z]+[0-9]*_', example)
         try:
-            match = re.match('[0-9]+', match.group()[len(ex_type):])
+            match = re.search('[0-9]+', match.group())
             n_groups = int(match.group())
         except AttributeError:
             n_groups = 4
@@ -240,7 +241,9 @@ def run_all():
         logger = test_utils.Logger(log_file)
         sys.stdout = logger
 
-        run(['Star', 'Circles'], inliers_threshold=0.015, local_ratio=3.,
+        run(['Star11'], inliers_threshold=0.02, local_ratio=3.,
+            restimate_gt=restimate_gt)
+        run(['Star5', 'Circles'], inliers_threshold=0.04, local_ratio=3.,
             restimate_gt=restimate_gt)
         run(['Stairs'], inliers_threshold=0.04, local_ratio=2.,
             restimate_gt=restimate_gt)
