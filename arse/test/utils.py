@@ -72,7 +72,7 @@ def clean(model_class, x, thresholder, ac_tester, bic_list,
         inliers_list, model_list, bic_list = filter_in(keep, inliers_list,
                                                        model_list, bic_list)
 
-    if not share_elements:
+    if not share_elements and inliers_list:
         solve_intersections(x, inliers_list, model_list)
         keep = meaningful(ac_tester, inliers_list)
         inliers_list, model_list, bic_list = filter_in(keep, inliers_list,
