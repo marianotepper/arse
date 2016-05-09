@@ -3,12 +3,11 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 import arse.pme.sampling as sampling
-import arse.pme.multigs as multigs
 import arse.pme.membership as membership
 import arse.pme.fundamental as fundamental
 import arse.pme.acontrario as ac
 import arse.test.test_transformations as test_transformations
-import arse.test.test_utils as test_utils
+import arse.test.utils as test_utils
 
 
 def keypoints_and_descriptors(img):
