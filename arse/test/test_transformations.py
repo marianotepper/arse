@@ -102,6 +102,7 @@ def run_biclustering(model_class, data, pref_matrix, comp_level, thresholder,
     plt.savefig(output_prefix + '_pref_mat.pdf', dpi=600)
 
     bc_groups = [np.squeeze(bic[0].toarray()) for bic in bic_list]
+    print('Inlier sets size:', [np.sum(g) for g in bc_groups])
 
     plot_models(data, bc_groups, palette=colors)
     plt.savefig(output_prefix + '_final_models.pdf', dpi=600)
@@ -109,11 +110,15 @@ def run_biclustering(model_class, data, pref_matrix, comp_level, thresholder,
     line_plot(data, groups=bc_groups, palette=colors)
     plt.savefig(output_prefix + '_line_plot.pdf', dpi=600)
 
-    if bc_groups:
-        inliers = reduce(lambda a, b: np.logical_or(a, b), bc_groups)
-    else:
-        inliers = np.zeros((pref_matrix.shape[0],), dtype=np.bool)
+    union = np.sum(np.vstack(bc_groups), axis=0) == 0
+    line_plot(data, groups=[union], palette=['#e7298a'])
+    plt.savefig(output_prefix + '_line_plot_outliers.pdf', dpi=600)
+
     if 'label' in data:
+        if bc_groups:
+            inliers = np.sum(np.vstack(bc_groups), axis=0) > 0
+        else:
+            inliers = np.zeros((pref_matrix.shape[0],), dtype=np.bool)
         bc_groups.append(np.logical_not(inliers))
         gt_groups = ground_truth(data['label'])
         gnmi, prec, rec = test_utils.compute_measures(gt_groups, bc_groups)
