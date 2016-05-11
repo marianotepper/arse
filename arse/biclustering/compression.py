@@ -2,7 +2,6 @@ from __future__ import absolute_import
 import numpy as np
 import multipledispatch
 import scipy.sparse as sp
-import collections
 from . import fct
 from . import utils
 
