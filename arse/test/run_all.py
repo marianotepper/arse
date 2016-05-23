@@ -1,9 +1,13 @@
+import os
 import test_2d
 import test_vp
 import test_pozzoveggiani
 import test_piazza_bra
 import test_adelaide
 import test_stereo
+
+if not os.path.isdir('logs'):
+    os.mkdir('logs')
 
 test_2d.run_all()
 test_vp.run_all()
