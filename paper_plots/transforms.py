@@ -61,6 +61,8 @@ def plot(filename):
              data.shape[0] + 1 + width + total_width / 2)
     plt.ylim(-1, (np.floor_divide(np.max(data), 10) + 2) * 10)
     plt.tight_layout()
+    
+    plt.savefig(filename[:-4] + '.pdf')
 
 
 if __name__ == '__main__':
