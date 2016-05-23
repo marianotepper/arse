@@ -110,7 +110,10 @@ def run_biclustering(model_class, data, pref_matrix, comp_level, thresholder,
     line_plot(data, groups=bc_groups, palette=colors)
     plt.savefig(output_prefix + '_line_plot.pdf', dpi=600)
 
-    union = np.sum(np.vstack(bc_groups), axis=0) == 0
+    if bc_groups:
+        union = np.sum(np.vstack(bc_groups), axis=0) == 0
+    else:
+        union = np.zeros((pref_matrix.shape[0],), dtype=np.bool)
     line_plot(data, groups=[union], palette=['#e7298a'])
     plt.savefig(output_prefix + '_line_plot_outliers.pdf', dpi=600)
 
