@@ -10,6 +10,7 @@ import os
 import arse.biclustering as bc
 import arse.test.utils as test_utils
 import arse.pme.preference as pref
+import arse.pme.postprocessing as postproc
 import arse.pme.line as line
 import arse.pme.sampling as sampling
 import arse.pme.membership as membership
@@ -80,8 +81,8 @@ def run_biclustering(image, x, pref_matrix, comp_level, thresholder,
     t1 = timeit.default_timer() - t
     print('Time:', t1)
 
-    models, bic_list = test_utils.clean(vp.VanishingPoint, x, thresholder,
-                                        ac_tester, bic_list)
+    models, bic_list = postproc.clean(vp.VanishingPoint, x, thresholder,
+                                      ac_tester, bic_list)
     bic_groups = [bic[0] for bic in bic_list]
 
     palette = sns.color_palette(palette, len(bic_list))

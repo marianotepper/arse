@@ -11,6 +11,7 @@ import timeit
 import arse.biclustering as bc
 import arse.test.utils as test_utils
 import arse.pme.preference as pref
+import arse.pme.postprocessing as postproc
 
 
 def base_plot(data):
@@ -92,8 +93,8 @@ def run_biclustering(model_class, data, pref_matrix, comp_level, thresholder,
     t1 = timeit.default_timer() - t
     print('Time:', t1)
 
-    bic_list = test_utils.clean(model_class, data['data'], thresholder,
-                                ac_tester, bic_list, share_elements=False)[1]
+    bic_list = postproc.clean(model_class, data['data'], thresholder,
+                              ac_tester, bic_list, share_elements=False)[1]
 
     colors = sns.color_palette(palette, len(bic_list))
 

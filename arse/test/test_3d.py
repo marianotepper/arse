@@ -9,6 +9,7 @@ import timeit
 import scipy.io
 import re
 import arse.pme.preference as pref
+import arse.pme.postprocessing as postproc
 import arse.biclustering as bc
 import arse.test.utils as test_utils
 
@@ -106,8 +107,8 @@ def run_biclustering(model_class, x, pref_matrix, comp_level, thresholder,
     t1 = timeit.default_timer() - t
     print('Time:', t1)
 
-    models, bic_list = test_utils.clean(model_class, x, thresholder, ac_tester,
-                                        bic_list, check_overlap=True)
+    models, bic_list = postproc.clean(model_class, x, thresholder, ac_tester,
+                                      bic_list, check_overlap=True)
     bic_groups = [bic[0] for bic in bic_list]
 
     palette = sns.color_palette(palette, len(bic_list), desat=.5)
