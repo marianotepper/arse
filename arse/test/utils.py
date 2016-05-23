@@ -43,7 +43,7 @@ def clean(model_class, x, thresholder, ac_tester, bic_list,
           check_overlap=False, share_elements=True):
     min_sample_size = model_class().min_sample_size
     bic_list = [bic for bic in bic_list
-                if bic[1].nnz > 10 and bic[0].nnz >= min_sample_size]
+                if bic[1].nnz > 1 and bic[0].nnz >= min_sample_size]
 
     inliers_list = []
     model_list = []
