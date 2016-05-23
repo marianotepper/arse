@@ -40,9 +40,12 @@ def load(path, tol=1e-5):
     return data
 
 
-def run(transformation, inliers_threshold):
-    logger = test_utils.Logger('test_{0}_{1:e}.txt'.format(transformation,
-                                                             inliers_threshold))
+def run(transformation, inliers_threshold, regular_nfa=True):
+    log_filename = 'test_{0}_{1}'.format(transformation, inliers_threshold)
+    if regular_nfa:
+        log_filename += '_regular_nfa'
+    print(log_filename)
+    logger = test_utils.Logger(log_filename + '.txt')
     sys.stdout = logger
 
     n_samples = 2000
@@ -61,16 +64,26 @@ def run(transformation, inliers_threshold):
 
         if transformation == 'homography':
             model_class = homography.Homography
-            nfa_proba = np.pi / np.prod(data['img2'].shape[:2])
+            if not regular_nfa:
+                img_size = data['img2'].shape[:2]
+                nfa_proba = np.pi / np.prod(img_size)
         else:
             model_class = fundamental.Fundamental
-            img_size = data['img2'].shape[:2]
-            nfa_proba = (2. * np.linalg.norm(img_size) / np.prod(img_size))
+            if not regular_nfa:
+                img_size = data['img2'].shape[:2]
+                nfa_proba = (2. * np.linalg.norm(img_size) / np.prod(img_size))
 
         generator = multigs.ModelGenerator(model_class, data['data'], n_samples)
         min_sample_size = model_class().min_sample_size
-        ac_tester = ac.ImageTransformNFA(epsilon, nfa_proba, min_sample_size)
-        thresholder = membership.GlobalThresholder(inliers_threshold)
+        if regular_nfa:
+            local_ratio = 3.
+            proba = 1. / local_ratio
+            tester = ac.BinomialNFA(epsilon, proba, min_sample_size)
+            thresholder = membership.LocalThresholder(inliers_threshold,
+                                                      ratio=local_ratio)
+        else:
+            tester = ac.ImageTransformNFA(epsilon, nfa_proba, min_sample_size)
+            thresholder = membership.GlobalThresholder(inliers_threshold)
 
         seed = 0
         # seed = np.random.randint(0, np.iinfo(np.uint32).max)
@@ -81,7 +94,7 @@ def run(transformation, inliers_threshold):
         dir_name = '{0}_{1:e}'.format(transformation, inliers_threshold)
 
         res = test_transformations.test(model_class, data, prefix, generator,
-                                        thresholder, ac_tester, dir_name)
+                                        thresholder, tester, dir_name)
         stats_list.append(res)
 
         print('-'*40)
@@ -100,11 +113,12 @@ def run(transformation, inliers_threshold):
 
 
 def run_all():
+    for thresh in np.arange(1, 10, .5):
+        run('homography', thresh, regular_nfa=False)
     for thresh in np.arange(1, 20, .5):
-        run('homography', thresh)
-    for thresh in np.arange(1, 20, .5):
-        run('fundamental', thresh)
-
+        run('fundamental', thresh, regular_nfa=False)
+    run('homography', 14.5, regular_nfa=True)
+    run('fundamental', 3., regular_nfa=True)
 
 if __name__ == '__main__':
     run_all()
