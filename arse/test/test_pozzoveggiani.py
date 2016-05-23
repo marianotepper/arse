@@ -77,7 +77,7 @@ class Projector(test_3d.BasePlotter):
 
 
 def run(subsampling=1, inliers_threshold=0.1, run_regular=True):
-    log_filename = 'pozzoveggiani_s{0}.txt'.format(subsampling)
+    log_filename = 'logs/pozzoveggiani_s{0}.txt'.format(subsampling)
     logger = utils.Logger(log_filename)
     sys.stdout = logger
 

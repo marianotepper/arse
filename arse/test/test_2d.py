@@ -233,7 +233,7 @@ def run(types, inliers_threshold=0.02, local_ratio=3., restimate_gt=False):
 
 def run_all():
     for restimate_gt in [False, True]:
-        log_file = 'test_2d_{0}.txt'
+        log_file = 'logs/test_2d_{0}.txt'
         if restimate_gt:
             log_file = log_file.format('restimate_gt')
         else:

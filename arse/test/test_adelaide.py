@@ -41,7 +41,7 @@ def load(path, tol=1e-5):
 
 
 def run(transformation, inliers_threshold, regular_nfa=True):
-    log_filename = 'test_{0}_{1}'.format(transformation, inliers_threshold)
+    log_filename = 'logs/test_{0}_{1}'.format(transformation, inliers_threshold)
     if regular_nfa:
         log_filename += '_regular_nfa'
     print(log_filename)

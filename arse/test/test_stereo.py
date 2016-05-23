@@ -103,7 +103,7 @@ def run(name):
 
 
 def run_all():
-    logger = test_utils.Logger('test_stereo.txt')
+    logger = test_utils.Logger('logs/test_stereo.txt')
     sys.stdout = logger
 
     run('Flowers-perfect')

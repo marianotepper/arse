@@ -151,7 +151,7 @@ def evaluate_york(res_dir_name, run_with_lsd=False):
     # RANSAC parameter
     inliers_threshold = np.pi * 1e-2
 
-    logger = test_utils.Logger(res_dir_name + '.txt')
+    logger = test_utils.Logger('logs/' + res_dir_name + '.txt')
     sys.stdout = logger
 
     dir_name = '/Users/mariano/Documents/datasets/YorkUrbanDB/'

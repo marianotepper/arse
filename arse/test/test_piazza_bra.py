@@ -12,7 +12,7 @@ import arse.test.test_3d as test_3d
 
 
 def run(subsampling=1, inliers_threshold=0.1, run_regular=True):
-    log_filename = 'piazza_bra_s{0}.txt'.format(subsampling)
+    log_filename = 'logs/piazza_bra_s{0}.txt'.format(subsampling)
     logger = utils.Logger(log_filename)
     sys.stdout = logger
 
