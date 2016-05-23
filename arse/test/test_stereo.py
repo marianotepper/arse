@@ -70,9 +70,6 @@ def load(path):
 
 
 def run(name):
-    logger = test_utils.Logger('test_stereo.txt')
-    sys.stdout = logger
-
     inliers_threshold = 50.
     n_samples = 5000
     epsilon = 0
@@ -103,11 +100,19 @@ def run(name):
                               ac_tester, name)
 
     plt.close('all')
+
+
+def run_all():
+    logger = test_utils.Logger('test_stereo.txt')
+    sys.stdout = logger
+
+    run('Flowers-perfect')
+    run('Mask-perfect')
+
     sys.stdout = logger.stdout
     logger.close()
 
 
 if __name__ == '__main__':
-    run('Flowers-perfect')
-    run('Mask-perfect')
+    run_all()
     plt.show()
