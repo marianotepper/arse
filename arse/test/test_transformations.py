@@ -126,9 +126,11 @@ def run_biclustering(model_class, data, pref_matrix, comp_level, thresholder,
         bc_groups.append(np.logical_not(inliers))
         gt_groups = ground_truth(data['label'])
         gnmi, prec, rec = test_utils.compute_measures(gt_groups, bc_groups)
-        return dict(time=t1, gnmi=gnmi, precision=prec, recall=rec)
+        stats = dict(time=t1, gnmi=gnmi, precision=prec, recall=rec)
     else:
-        return dict(time=t1)
+        stats = dict(time=t1)
+
+    return stats, bc_groups
 
 
 def test(model_class, data, name, ransac_gen, thresholder, ac_tester,
@@ -173,14 +175,17 @@ def test(model_class, data, name, ransac_gen, thresholder, ac_tester,
 
     print('Running regular bi-clustering')
     compression_level = None
-    stats_reg = run_biclustering(model_class, data, pref_matrix,
+    stats_reg, groups_reg = run_biclustering(model_class, data, pref_matrix,
                                  compression_level, thresholder, ac_tester,
                                  output_prefix + '_bic_reg')
 
     print('Running compressed bi-clustering')
     compression_level = 32
-    stats_comp = run_biclustering(model_class, data, pref_matrix,
+    stats_comp, groups_comp = run_biclustering(model_class, data, pref_matrix,
                                   compression_level, thresholder, ac_tester,
                                   output_prefix + '_bic_comp')
+
+    print('Comparing both solutions:')
+    test_utils.compute_measures(groups_reg, groups_comp)
 
     return stats_reg, stats_comp
