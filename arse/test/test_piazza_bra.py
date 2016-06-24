@@ -63,8 +63,8 @@ def run_all():
         fn = run(subsampling=s_level, run_regular=run_regular)
         log_filenames.append(fn)
 
-    # log_filenames = ['piazza_bra_s10.txt', 'piazza_bra_s5.txt',
-    #                  'piazza_bra_s2.txt', 'piazza_bra_s1.txt']
+    log_filenames = ['logs/piazza_bra_s10.txt', 'logs/piazza_bra_s5.txt',
+                     'logs/piazza_bra_s2.txt', 'logs/piazza_bra_s1.txt']
     test_3d.plot_times(log_filenames, 'piazza_bra_times', relative=False)
     test_3d.plot_times(log_filenames, 'piazza_bra_times', relative=True)
 

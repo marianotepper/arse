@@ -143,8 +143,8 @@ def run_all():
         fn = run(subsampling=s_level, run_regular=True)
         log_filenames.append(fn)
 
-    # log_filenames = ['pozzoveggiani_s10.txt', 'pozzoveggiani_s5.txt',
-    #                  'pozzoveggiani_s2.txt', 'pozzoveggiani_s1.txt']
+    log_filenames = ['logs/pozzoveggiani_s10.txt', 'logs/pozzoveggiani_s5.txt',
+                     'logs/pozzoveggiani_s2.txt', 'logs/pozzoveggiani_s1.txt']
     test_3d.plot_times(log_filenames, 'pozzoveggiani_times', relative=False)
     test_3d.plot_times(log_filenames, 'pozzoveggiani_times', relative=True)
 

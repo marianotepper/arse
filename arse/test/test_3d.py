@@ -197,17 +197,32 @@ def plot_times(log_filenames, output_filename, relative=False, col_width=0.35):
         rse_time = rse_time / ps
         arse_time = arse_time / ps
 
+    def autolabel(rects):
+        for rect in rects:
+            height = rect.get_height()
+            if np.isnan(height):
+                continue
+            str = '{:.2e}'.format(height)
+            str = str.split('e')
+            print(str)
+            str = str[0] + 'e' + str[1][2:]
+            plt.text(rect.get_x() + rect.get_width() / 2., 1.05 * height,
+                     str, ha='center', va='bottom', fontsize='16')
+
     colors = sns.color_palette('Set1', n_colors=2)
 
     with sns.axes_style('whitegrid'):
         plt.figure()
         plt.yscale('log')
 
-        bars = plt.bar(idx, rse_time, col_width, linewidth=0, color=colors[0])
-        bars.set_label('RSE')
-        bars = plt.bar(idx + col_width, arse_time, col_width, linewidth=0,
+        bars1 = plt.bar(idx, rse_time, col_width, linewidth=0, color=colors[0])
+        bars1.set_label('RSE')
+        bars2 = plt.bar(idx + col_width, arse_time, col_width, linewidth=0,
                        color=colors[1])
-        bars.set_label('ARSE')
+        bars2.set_label('ARSE')
+        if not relative:
+            autolabel(bars1)
+            autolabel(bars2)
 
         plt.xticks(idx + col_width, pref_sizes, horizontalalignment='center',
                    fontsize='16')
