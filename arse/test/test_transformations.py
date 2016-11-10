@@ -125,8 +125,8 @@ def run_biclustering(model_class, data, pref_matrix, comp_level, thresholder,
             inliers = np.zeros((pref_matrix.shape[0],), dtype=np.bool)
         bc_groups.append(np.logical_not(inliers))
         gt_groups = ground_truth(data['label'])
-        gnmi, prec, rec = test_utils.compute_measures(gt_groups, bc_groups)
-        stats = dict(time=t1, gnmi=gnmi, precision=prec, recall=rec)
+        stats = test_utils.compute_measures(gt_groups, bc_groups, use_me=True)
+        stats['time'] = t1
     else:
         stats = dict(time=t1)
 

@@ -96,10 +96,12 @@ def run_biclustering(image, x, pref_matrix, comp_level, thresholder,
     plt.savefig(output_prefix + '_final_models.pdf', dpi=600)
 
     if gt_groups is not None:
-        gnmi, prec, rec = test_utils.compute_measures(gt_groups, bic_groups)
-        return dict(time=t1, gnmi=gnmi, precision=prec, recall=rec)
+        stats = test_utils.compute_measures(gt_groups, bic_groups)
+        stats['time'] = t1
     else:
-        return dict(time=t1)
+        stats = dict(time=t1)
+
+    return stats
 
 
 def test(image, x, res_dir_name, name, ransac_gen, thresholder, ac_tester,

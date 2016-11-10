@@ -98,9 +98,11 @@ def run_biclustering(model_class, x, original_models, pref_matrix, comp_level,
     plt.savefig(output_prefix + '_bundles.pdf', dpi=600)
 
     bc_groups = [bic[0] for bic in bic_list]
-    gnmi, prec, rec = test_utils.compute_measures(gt_groups, bc_groups)
 
-    return dict(time=t1, gnmi=gnmi, precision=prec, recall=rec)
+    stats = test_utils.compute_measures(gt_groups, bc_groups)
+    stats['time'] = t1
+
+    return stats
 
 
 def test(model_class, x, name, ransac_gen, thresholder, ac_tester, gt_groups,

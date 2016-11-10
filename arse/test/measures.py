@@ -168,7 +168,42 @@ def mean_precision_recall(gt_groups, groups):
         return 0, 0
     conf = confusion_matrix(gt_groups, groups)
     idx = hungarian.linear_assignment(conf.max() - conf)
-    conf = conf.take(idx[:, 0], axis=0).take(idx[:, 1], axis=1)
-    precision = np.trace(conf) / sum([size(c) for c in groups])
-    recall = np.trace(conf) / sum([size(c) for c in gt_groups])
-    return precision, recall
+
+    matches = np.array([conf[i[0], i[1]] for i in idx])
+
+    gt_sizes = np.array([size(gt_groups[i[0]]) for i in idx])
+    recall = matches / gt_sizes
+    mean_recall = np.sum(recall) / len(gt_groups)
+
+    g_sizes = np.array([size(groups[i[1]]) for i in idx])
+    precision = matches / g_sizes
+    mean_precision = np.sum(precision) / len(groups)
+
+    return mean_precision, mean_recall
+
+
+def mean_precision(gt_groups, groups):
+    return mean_precision_recall(gt_groups, groups)[0]
+
+
+def mean_recall(gt_groups, groups):
+    return mean_precision_recall(gt_groups, groups)[1]
+
+
+def misclassifitation_error(gt_groups, groups):
+    """
+    Compute the misclassification error.
+
+    :param gt_groups: set of ground truth groups
+    :param groups: set of tested groups
+    :return: misclassification error
+    """
+    if not groups:
+        return 0, 0
+    conf = confusion_matrix(gt_groups, groups)
+
+    idx = hungarian.linear_assignment(conf.max() - conf)
+    matches = np.array([conf[i[0], i[1]] for i in idx])
+
+    me = 1 - np.sum(matches) / sum([size(c) for c in gt_groups])
+    return me
