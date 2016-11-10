@@ -8,6 +8,8 @@ def compute_measures(gt_groups, left_factors, verbose=True, use_me=False):
     stats = {'gnmi': mes.gnmi(gt_groups, left_factors),
              'precision': mes.mean_precision(gt_groups, left_factors),
              'recall': mes.mean_recall(gt_groups, left_factors)}
+    for s in stats:
+        stats[s] = np.round(stats[s], decimals=4)
 
     measures_str = 'GNMI: {gnmi:1.4f}; '
     measures_str += 'Precision: {precision:1.4f}; Recall: {recall:1.4f}'
@@ -31,8 +33,11 @@ def compute_stats(stats, verbose=True):
                 ddof = 1
             else:
                 ddof = 0
-            summary = {'mean': np.mean(vals), 'std': np.std(vals, ddof=ddof),
+            summary = {'mean': np.mean(vals),
+                       'std': np.std(vals, ddof=ddof),
                        'median': np.median(vals)}
+            for s in summary:
+                summary[s] = np.round(summary[s], decimals=4)
             if verbose:
                 print(val_str.format(**summary))
             return summary
